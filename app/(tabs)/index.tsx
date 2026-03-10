@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
+import { View, StyleSheet, FlatList, RefreshControl, Platform } from 'react-native';
 import { Text, Searchbar, Chip } from 'react-native-paper';
 import { router } from 'expo-router';
 import { COLORS, SPACING, FONT_SIZES } from '../../constants/theme';

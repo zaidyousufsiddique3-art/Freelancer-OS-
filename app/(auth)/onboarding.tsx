@@ -1,200 +1,215 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { Text, Button, TextInput } from 'react-native-paper';
+import React, { useState, useRef } from 'react';
+import { View, StyleSheet, FlatList, Dimensions, Animated, TouchableOpacity } from 'react-native';
+import { Text, Button } from 'react-native-paper';
 import { router } from 'expo-router';
-import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES } from '../../constants/theme';
-import { useAuthStore } from '../../store/authStore';
-import CategoryPicker from '../../components/CategoryPicker';
-import { Category } from '../../types';
-import { updateUserProfile } from '../../services/auth';
+import { StatusBar } from 'expo-status-bar';
+
+const { width, height } = Dimensions.get('window');
+
+const SLIDES = [
+    {
+        id: '1',
+        title: 'Post a Task',
+        description: 'Describe what you need done and set your own budget. It only takes 2 minutes.',
+        icon: '⚡',
+    },
+    {
+        id: '2',
+        title: 'Get Real Offers',
+        description: 'Receive competitive offers from top-rated freelancers instantly.',
+        icon: '💎',
+    },
+    {
+        id: '3',
+        title: 'Work Securely',
+        description: 'Chat, collaborate, and pay only when the job is done to your satisfaction.',
+        icon: '🛡️',
+    },
+];
 
 export default function OnboardingScreen() {
-  const user = useAuthStore((s) => s.user);
-  const [bio, setBio] = useState('');
-  const [skills, setSkills] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(false);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const scrollX = useRef(new Animated.Value(0)).current;
+    const slidesRef = useRef(null);
 
-  const isFreelancer = user?.role === 'freelancer';
+    const viewableItemsChanged = useRef(({ viewableItems }: any) => {
+        if (viewableItems[0]) {
+            setCurrentIndex(viewableItems[0].index);
+        }
+    }).current;
 
-  const toggleCategory = (cat: Category) => {
-    setSelectedCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
+    const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
+
+    const scrollTo = () => {
+        if (currentIndex < SLIDES.length - 1) {
+            // @ts-ignore
+            slidesRef.current.scrollToIndex({ index: currentIndex + 1 });
+        } else {
+            router.push('/(auth)/register');
+        }
+    };
+
+    const renderItem = ({ item }: { item: typeof SLIDES[0] }) => {
+        return (
+            <View style={styles.slide}>
+                <View style={styles.iconContainer}>
+                    <Text style={styles.icon}>{item.icon}</Text>
+                </View>
+                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.description}>{item.description}</Text>
+            </View>
+        );
+    };
+
+    return (
+        <View style={styles.container}>
+            <StatusBar style="light" />
+            <View style={{ flex: 3 }}>
+                <FlatList
+                    data={SLIDES}
+                    renderItem={renderItem}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    pagingEnabled
+                    bounces={false}
+                    keyExtractor={(item) => item.id}
+                    onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+                        useNativeDriver: false,
+                    })}
+                    onViewableItemsChanged={viewableItemsChanged}
+                    viewabilityConfig={viewConfig}
+                    ref={slidesRef}
+                />
+            </View>
+
+            <View style={styles.footer}>
+                <View style={styles.pagination}>
+                    {SLIDES.map((_, i) => {
+                        const inputRange = [(i - 1) * width, i * width, (i + 1) * width];
+                        const dotWidth = scrollX.interpolate({
+                            inputRange,
+                            outputRange: [10, 30, 10],
+                            extrapolate: 'clamp',
+                        });
+                        const opacity = scrollX.interpolate({
+                            inputRange,
+                            outputRange: [0.3, 1, 0.3],
+                            extrapolate: 'clamp',
+                        });
+                        return (
+                            <Animated.View
+                                key={i.toString()}
+                                style={[styles.dot, { width: dotWidth, opacity }]}
+                            />
+                        );
+                    })}
+                </View>
+
+                <View style={styles.buttonContainer}>
+                    {currentIndex < SLIDES.length - 1 ? (
+                        <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
+                            <Text style={styles.skip}>Skip</Text>
+                        </TouchableOpacity>
+                    ) : (
+                        <View style={{ width: 40 }} />
+                    )}
+
+                    <Button
+                        mode="contained"
+                        onPress={scrollTo}
+                        style={styles.button}
+                        labelStyle={styles.buttonLabel}
+                        contentStyle={styles.buttonContent}
+                    >
+                        {currentIndex === SLIDES.length - 1 ? 'Get Started' : 'Next'}
+                    </Button>
+                </View>
+            </View>
+        </View>
     );
-  };
-
-  const handleComplete = async () => {
-    setLoading(true);
-    try {
-      await updateUserProfile({
-        bio: bio.trim(),
-        skills: skills
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean),
-        categories: selectedCategories,
-      });
-      router.replace('/(tabs)');
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.header}>
-        <Text style={styles.title}>
-          {isFreelancer ? 'Set up your profile' : 'Almost there!'}
-        </Text>
-        <Text style={styles.subtitle}>
-          {isFreelancer
-            ? 'Tell clients what you do best'
-            : 'Select categories you typically hire for'}
-        </Text>
-      </View>
-
-      {isFreelancer && (
-        <>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>About you</Text>
-            <TextInput
-              label="Short bio"
-              value={bio}
-              onChangeText={setBio}
-              mode="outlined"
-              multiline
-              numberOfLines={3}
-              style={styles.input}
-              outlineStyle={styles.inputOutline}
-              placeholder="e.g., Full-stack developer with 5 years of experience..."
-            />
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Skills</Text>
-            <TextInput
-              label="Your skills (comma separated)"
-              value={skills}
-              onChangeText={setSkills}
-              mode="outlined"
-              style={styles.input}
-              outlineStyle={styles.inputOutline}
-              placeholder="e.g., React, Node.js, TypeScript, Figma"
-            />
-          </View>
-        </>
-      )}
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>
-          {isFreelancer ? 'Categories you work in' : 'Categories you hire for'}
-        </Text>
-        <Text style={styles.sectionHint}>
-          {isFreelancer
-            ? "You'll get notified about jobs in these categories"
-            : 'This helps us personalize your experience'}
-        </Text>
-        <CategoryPicker
-          selected={selectedCategories}
-          onSelect={toggleCategory}
-          multiple
-        />
-      </View>
-
-      <Button
-        mode="contained"
-        onPress={handleComplete}
-        loading={loading}
-        disabled={loading || selectedCategories.length === 0}
-        style={styles.button}
-        labelStyle={styles.buttonLabel}
-        contentStyle={styles.buttonContent}
-      >
-        {isFreelancer ? "Let's Go!" : 'Start Posting Tasks'}
-      </Button>
-
-      <Button
-        mode="text"
-        onPress={() => router.replace('/(tabs)')}
-        style={styles.skipButton}
-        labelStyle={styles.skipLabel}
-      >
-        Skip for now
-      </Button>
-    </ScrollView>
-  );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000000',
-  },
-  content: {
-    paddingHorizontal: SPACING.xl,
-    paddingTop: 80,
-    paddingBottom: 60,
-  },
-  header: {
-    marginBottom: 40,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: -1,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#94A3B8',
-    marginTop: 8,
-    lineHeight: 24,
-  },
-  section: {
-    marginBottom: 32,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: 8,
-  },
-  sectionHint: {
-    fontSize: 14,
-    color: '#64748B',
-    marginBottom: 20,
-  },
-  input: {
-    backgroundColor: '#000000',
-  },
-  inputOutline: {
-    borderRadius: 12,
-    borderColor: '#334155',
-    borderWidth: 1.5,
-  },
-  button: {
-    marginTop: 20,
-    borderRadius: 12,
-    height: 56,
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  buttonLabel: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#000000',
-  },
-  buttonContent: {
-    height: 56,
-  },
-  skipButton: {
-    marginTop: 12,
-  },
-  skipLabel: {
-    color: '#64748B',
-    fontSize: 14,
-    fontWeight: '600',
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#000000',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    slide: {
+        width,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 40,
+    },
+    iconContainer: {
+        width: 200,
+        height: 200,
+        borderRadius: 100,
+        backgroundColor: '#111111',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 40,
+        borderWidth: 1,
+        borderColor: '#1E293B',
+    },
+    icon: {
+        fontSize: 80,
+    },
+    title: {
+        fontSize: 32,
+        fontWeight: '900',
+        color: '#FFFFFF',
+        textAlign: 'center',
+        marginBottom: 20,
+        letterSpacing: -1,
+    },
+    description: {
+        fontSize: 18,
+        color: '#94A3B8',
+        textAlign: 'center',
+        lineHeight: 28,
+    },
+    footer: {
+        height: height * 0.25,
+        justifyContent: 'space-between',
+        paddingHorizontal: 40,
+        width: '100%',
+    },
+    pagination: {
+        flexDirection: 'row',
+        height: 64,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    dot: {
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: '#FFFFFF',
+        marginHorizontal: 8,
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 40,
+    },
+    skip: {
+        color: '#64748B',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    button: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        paddingHorizontal: 20,
+    },
+    buttonLabel: {
+        color: '#000000',
+        fontSize: 16,
+        fontWeight: '700',
+    },
+    buttonContent: {
+        height: 50,
+    },
 });

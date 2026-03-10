@@ -41,6 +41,7 @@ export default function TabLayout() {
           letterSpacing: -0.5,
         },
       }}
+      sceneContainerStyle={{ backgroundColor: '#000000' }}
     >
       <Tabs.Screen
         name="index"

@@ -17,36 +17,41 @@ export default function RootLayout() {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.background }}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#000000' }}>
+        <ActivityIndicator size="large" color="#FFFFFF" />
       </View>
     );
   }
 
   return (
     <PaperProvider theme={paperTheme}>
-      <StatusBar style="light" />
-      <Stack screenOptions={{ headerShown: false }}>
-        {isAuthenticated ? (
-          <>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen
-              name="task/[id]"
-              options={{ headerShown: true, title: 'Task Details' }}
-            />
-            <Stack.Screen
-              name="chat/[id]"
-              options={{ headerShown: true, title: 'Chat' }}
-            />
-            <Stack.Screen
-              name="offers/[taskId]"
-              options={{ headerShown: true, title: 'Offers' }}
-            />
-          </>
-        ) : (
-          <Stack.Screen name="(auth)" />
-        )}
-      </Stack>
+      <View style={{ flex: 1, backgroundColor: '#000000' }}>
+        <StatusBar style="light" />
+        <Stack screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: '#000000' }
+        }}>
+          {isAuthenticated ? (
+            <>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen
+                name="task/[id]"
+                options={{ headerShown: true, title: 'Task Details' }}
+              />
+              <Stack.Screen
+                name="chat/[id]"
+                options={{ headerShown: true, title: 'Chat' }}
+              />
+              <Stack.Screen
+                name="offers/[taskId]"
+                options={{ headerShown: true, title: 'Offers' }}
+              />
+            </>
+          ) : (
+            <Stack.Screen name="(auth)" />
+          )}
+        </Stack>
+      </View>
     </PaperProvider>
   );
 }
