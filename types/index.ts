@@ -33,6 +33,10 @@ export interface User {
   bio: string;
   createdAt: number;
   pushToken?: string;
+  // Service Provider fields
+  serviceTitle?: string;
+  priceRange?: string;
+  deliveryTime?: string;
 }
 
 export interface Task {

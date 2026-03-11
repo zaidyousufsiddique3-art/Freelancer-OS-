@@ -6,18 +6,30 @@ import {
   TouchableOpacity,
   Animated,
   Platform,
+  Alert,
 } from 'react-native';
 import { Text, TextInput } from 'react-native-paper';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useAuthStore } from '../../store/authStore';
 import CategoryPicker from '../../components/CategoryPicker';
-import { Category } from '../../types';
-import { updateUserProfile } from '../../services/auth';
+import { Category, UserRole } from '../../types';
+import { signUp, updateUserProfile } from '../../services/auth';
 
 export default function SetupProfileScreen() {
-  const user = useAuthStore((s) => s.user);
-  const [bio, setBio] = useState('');
+  const params = useLocalSearchParams<{
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    country?: string;
+    password?: string;
+    role?: string;
+  }>();
+
+  const [serviceTitle, setServiceTitle] = useState('');
+  const [bio, setBio] = useState(''); // Service description
+  const [priceRange, setPriceRange] = useState('');
+  const [deliveryTime, setDeliveryTime] = useState('');
   const [skills, setSkills] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
@@ -25,9 +37,12 @@ export default function SetupProfileScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
-  const isFreelancer = user?.role === 'freelancer';
-
   useEffect(() => {
+    // If we randomly arrive without pass data or role is client, go back to role selection
+    if (!params.email || params.role !== 'freelancer') {
+      router.replace('/(auth)/role-select');
+    }
+
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -43,25 +58,44 @@ export default function SetupProfileScreen() {
   }, []);
 
   const toggleCategory = (cat: Category) => {
-    setSelectedCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
-    );
+    setSelectedCategories([cat]); // Only allowing one primary service category as it's common for service registration
   };
 
   const handleComplete = async () => {
+    if (!serviceTitle.trim() || !bio.trim() || !priceRange.trim() || !deliveryTime.trim() || selectedCategories.length === 0) {
+      Alert.alert('Error', 'Please fill in all required fields and select a category.');
+      return;
+    }
+
     setLoading(true);
     try {
+      const fullName = `${params.firstName?.trim() || ''} ${params.lastName?.trim() || ''}`.trim();
+
+      // 1. Create the user account FIRST
+      await signUp(
+        params.email!,
+        params.password!,
+        fullName,
+        params.role as UserRole
+      );
+
+      // 2. Immediately update the profile with the mandatory Service details
       await updateUserProfile({
-        bio: bio.trim(),
+        serviceTitle: serviceTitle.trim(),
+        bio: bio.trim(), // Acts as Service Description
+        priceRange: priceRange.trim(),
+        deliveryTime: deliveryTime.trim(),
         skills: skills
           .split(',')
           .map((s) => s.trim())
           .filter(Boolean),
         categories: selectedCategories,
       });
+
+      // 3. User is now registered + service created -> Dashboard
       router.replace('/(tabs)');
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -72,6 +106,7 @@ export default function SetupProfileScreen() {
       style={styles.container}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
     >
       <StatusBar style="dark" />
 
@@ -82,55 +117,66 @@ export default function SetupProfileScreen() {
           { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
         ]}
       >
-        {/* Progress indicator */}
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <View style={styles.progressFill} />
-          </View>
-          <Text style={styles.progressText}>Final step</Text>
-        </View>
-
-        <Text style={styles.title}>
-          {isFreelancer ? 'Set up your profile' : 'Almost there!'}
-        </Text>
+        <Text style={styles.title}>Register Your Service</Text>
         <Text style={styles.subtitle}>
-          {isFreelancer
-            ? 'Tell clients what you do best'
-            : 'Select categories you typically hire for'}
+          This is mandatory. Describe your service to create your account.
         </Text>
       </Animated.View>
 
-      {/* Freelancer-specific fields */}
-      {isFreelancer && (
-        <Animated.View
-          style={[
-            { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
-          ]}
-        >
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>About you</Text>
-            <TextInput
-              value={bio}
-              onChangeText={setBio}
-              mode="outlined"
-              multiline
-              numberOfLines={3}
-              placeholder="Full-stack developer with 5 years of experience..."
-              style={styles.textArea}
-              outlineStyle={styles.inputOutline}
-              outlineColor="#E5E5E5"
-              activeOutlineColor="#C1F21D"
-              placeholderTextColor="#9CA3AF"
-            />
-          </View>
+      <Animated.View
+        style={[
+          { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
+        ]}
+      >
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Service Title <Text style={{ color: 'red' }}>*</Text></Text>
+          <TextInput
+            value={serviceTitle}
+            onChangeText={setServiceTitle}
+            mode="outlined"
+            placeholder="e.g. Professional Web Design"
+            style={styles.input}
+            outlineStyle={styles.inputOutline}
+            outlineColor="#E5E5E5"
+            activeOutlineColor="#C1F21D"
+            placeholderTextColor="#9CA3AF"
+          />
+        </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Skills</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Service Category <Text style={{ color: 'red' }}>*</Text></Text>
+          <CategoryPicker
+            selected={selectedCategories.length > 0 ? selectedCategories[0] : null}
+            onSelect={toggleCategory}
+            multiple={false}
+          />
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Service Description <Text style={{ color: 'red' }}>*</Text></Text>
+          <TextInput
+            value={bio}
+            onChangeText={setBio}
+            mode="outlined"
+            multiline
+            numberOfLines={4}
+            placeholder="Describe what you will do, your process, and what the client gets..."
+            style={styles.textArea}
+            outlineStyle={styles.inputOutline}
+            outlineColor="#E5E5E5"
+            activeOutlineColor="#C1F21D"
+            placeholderTextColor="#9CA3AF"
+          />
+        </View>
+
+        <View style={styles.row}>
+          <View style={[styles.section, styles.halfField]}>
+            <Text style={styles.sectionTitle}>Price Range <Text style={{ color: 'red' }}>*</Text></Text>
             <TextInput
-              value={skills}
-              onChangeText={setSkills}
+              value={priceRange}
+              onChangeText={setPriceRange}
               mode="outlined"
-              placeholder="React, Node.js, TypeScript, Figma"
+              placeholder="$50 - $200"
               style={styles.input}
               outlineStyle={styles.inputOutline}
               outlineColor="#E5E5E5"
@@ -138,56 +184,55 @@ export default function SetupProfileScreen() {
               placeholderTextColor="#9CA3AF"
             />
           </View>
-        </Animated.View>
-      )}
+          <View style={[styles.section, styles.halfField]}>
+            <Text style={styles.sectionTitle}>Delivery Time <Text style={{ color: 'red' }}>*</Text></Text>
+            <TextInput
+              value={deliveryTime}
+              onChangeText={setDeliveryTime}
+              mode="outlined"
+              placeholder="e.g. 3 Days"
+              style={styles.input}
+              outlineStyle={styles.inputOutline}
+              outlineColor="#E5E5E5"
+              activeOutlineColor="#C1F21D"
+              placeholderTextColor="#9CA3AF"
+            />
+          </View>
+        </View>
 
-      {/* Categories */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>
-          {isFreelancer ? 'Categories you work in' : 'Categories you hire for'}
-        </Text>
-        <Text style={styles.sectionHint}>
-          {isFreelancer
-            ? "You'll get notified about jobs in these categories"
-            : 'This helps us personalize your experience'}
-        </Text>
-        <CategoryPicker
-          selected={selectedCategories}
-          onSelect={toggleCategory}
-          multiple
-        />
-      </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Skills (Comma separated)</Text>
+          <TextInput
+            value={skills}
+            onChangeText={setSkills}
+            mode="outlined"
+            placeholder="React, Design, Excel"
+            style={styles.input}
+            outlineStyle={styles.inputOutline}
+            outlineColor="#E5E5E5"
+            activeOutlineColor="#C1F21D"
+            placeholderTextColor="#9CA3AF"
+          />
+        </View>
 
-      {/* Complete button */}
-      <TouchableOpacity
-        style={[
-          styles.completeButton,
-          (loading || selectedCategories.length === 0) && styles.completeButtonDisabled,
-        ]}
-        onPress={handleComplete}
-        activeOpacity={0.85}
-        disabled={loading || selectedCategories.length === 0}
-      >
-        <Text style={[
-          styles.completeButtonText,
-          (loading || selectedCategories.length === 0) && styles.completeButtonTextDisabled,
-        ]}>
-          {loading
-            ? 'Saving...'
-            : isFreelancer
-              ? "Let's Go!"
-              : 'Start Posting Tasks'}
-        </Text>
-      </TouchableOpacity>
-
-      {/* Skip */}
-      <TouchableOpacity
-        style={styles.skipButton}
-        onPress={() => router.replace('/(tabs)')}
-        activeOpacity={0.7}
-      >
-        <Text style={styles.skipText}>Skip for now</Text>
-      </TouchableOpacity>
+        {/* Complete button */}
+        <TouchableOpacity
+          style={[
+            styles.completeButton,
+            loading && styles.completeButtonDisabled,
+          ]}
+          onPress={handleComplete}
+          activeOpacity={0.85}
+          disabled={loading}
+        >
+          <Text style={[
+            styles.completeButtonText,
+            loading && styles.completeButtonTextDisabled,
+          ]}>
+            {loading ? 'Creating Account...' : 'Register My Service'}
+          </Text>
+        </TouchableOpacity>
+      </Animated.View>
     </ScrollView>
   );
 }
@@ -205,30 +250,6 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 32,
   },
-  progressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-    gap: 12,
-  },
-  progressBar: {
-    flex: 1,
-    height: 4,
-    backgroundColor: '#F0F0F0',
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#C1F21D',
-    borderRadius: 2,
-  },
-  progressText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#6B7280',
-  },
   title: {
     fontSize: 24,
     fontWeight: '700',
@@ -243,18 +264,20 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
   section: {
-    marginBottom: 28,
+    marginBottom: 20,
+  },
+  row: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  halfField: {
+    flex: 1,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#111111',
-    marginBottom: 8,
-  },
-  sectionHint: {
     fontSize: 14,
-    color: '#6B7280',
-    marginBottom: 16,
+    fontWeight: '600',
+    color: '#111111',
+    marginBottom: 6,
   },
   input: {
     backgroundColor: '#FFFFFF',
@@ -264,7 +287,7 @@ const styles = StyleSheet.create({
   textArea: {
     backgroundColor: '#FFFFFF',
     fontSize: 16,
-    minHeight: 80,
+    minHeight: 100,
   },
   inputOutline: {
     borderRadius: 12,
@@ -277,7 +300,7 @@ const styles = StyleSheet.create({
     height: 52,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
+    marginTop: 16,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.06,
@@ -285,7 +308,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   completeButtonDisabled: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#E5E5E5',
     shadowOpacity: 0,
     elevation: 0,
   },
@@ -296,15 +319,5 @@ const styles = StyleSheet.create({
   },
   completeButtonTextDisabled: {
     color: '#9CA3AF',
-  },
-  skipButton: {
-    alignItems: 'center',
-    marginTop: 16,
-    paddingVertical: 8,
-  },
-  skipText: {
-    color: '#6B7280',
-    fontSize: 14,
-    fontWeight: '600',
   },
 });

@@ -58,6 +58,25 @@ export default function RegisterScreen() {
       return;
     }
     setError('');
+
+    // For Service Providers: Pass data to Service Registration without creating account yet.
+    if (selectedRole === 'freelancer') {
+      router.push({
+        pathname: '/(auth)/setup-profile',
+        params: {
+          firstName,
+          lastName,
+          email,
+          phone,
+          country,
+          password: method === 'email' ? password : 'google-auth-placeholder',
+          role: selectedRole,
+        },
+      });
+      return;
+    }
+
+    // For Hiring/Clients: Create account immediately and skip service registration.
     setLoading(true);
     try {
       await signUp(
@@ -66,7 +85,7 @@ export default function RegisterScreen() {
         fullName,
         selectedRole
       );
-      router.replace('/(auth)/setup-profile');
+      router.replace('/(tabs)');
     } catch (err: any) {
       setError(err.message || 'Registration failed');
     } finally {
@@ -237,7 +256,7 @@ export default function RegisterScreen() {
             disabled={loading}
           >
             <Text style={styles.submitButtonText}>
-              {loading ? 'Creating account...' : isGoogle ? 'Save' : 'Submit'}
+              {loading ? 'Creating account...' : selectedRole === 'freelancer' ? 'Continue' : 'Create Account'}
             </Text>
           </TouchableOpacity>
 

@@ -45,7 +45,7 @@ export const signOutUser = async (): Promise<void> => {
 };
 
 export const updateUserProfile = async (
-  updates: Partial<Pick<User, 'bio' | 'skills' | 'categories' | 'name' | 'avatar'>>
+  updates: Partial<Pick<User, 'bio' | 'skills' | 'categories' | 'name' | 'avatar' | 'serviceTitle' | 'priceRange' | 'deliveryTime'>>
 ): Promise<void> => {
   const currentUser = useAuthStore.getState().user;
   if (!currentUser) throw new Error('Not authenticated');
