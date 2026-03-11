@@ -1,16 +1,24 @@
 import { useEffect } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Platform } from 'react-native';
 import { Stack } from 'expo-router';
 import { PaperProvider } from 'react-native-paper';
 import { paperTheme, COLORS } from '../constants/theme';
 import { useAuthStore } from '../store/authStore';
 import { StatusBar } from 'expo-status-bar';
-import { initAuthListener } from '../services/auth';
+import { initAuthListener, signOutUser } from '../services/auth';
 
 export default function RootLayout() {
   const { isAuthenticated, isLoading } = useAuthStore();
 
   useEffect(() => {
+    // Force logout on first load for the current tab session so it defaults to onboarding
+    if (Platform.OS === 'web') {
+      if (!sessionStorage.getItem('app_started')) {
+        signOutUser().catch(() => { });
+        sessionStorage.setItem('app_started', 'true');
+      }
+    }
+
     const unsubscribe = initAuthListener();
     return () => unsubscribe();
   }, []);

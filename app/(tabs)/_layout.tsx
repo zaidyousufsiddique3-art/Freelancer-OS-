@@ -1,8 +1,9 @@
 import { Tabs } from 'expo-router';
-import { Platform } from 'react-native';
+import { Platform, TouchableOpacity, Text } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '../../constants/theme';
 import { useAuthStore } from '../../store/authStore';
+import { signOutUser } from '../../services/auth';
 
 export default function TabLayout() {
   const user = useAuthStore((s: any) => s.user);
@@ -40,6 +41,26 @@ export default function TabLayout() {
           fontSize: 22,
           letterSpacing: -0.5,
         },
+        headerRight: () => (
+          <TouchableOpacity
+            onPress={() => signOutUser()}
+            style={{
+              marginRight: 16,
+              backgroundColor: '#EF4444',
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: 8,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            <MaterialCommunityIcons name="logout" size={16} color="#FFFFFF" />
+            <Text style={{ color: '#FFFFFF', fontWeight: '700', fontSize: 12 }}>
+              Logout
+            </Text>
+          </TouchableOpacity>
+        ),
       }}
       sceneContainerStyle={{ backgroundColor: '#FFFFFF' }}
     >
