@@ -1,49 +1,117 @@
-import React from 'react';
-import { View, StyleSheet, Image, Dimensions } from 'react-native';
-import { Text, Button } from 'react-native-paper';
+import React, { useEffect, useRef } from 'react';
+import { View, StyleSheet, Animated, TouchableOpacity, Platform } from 'react-native';
+import { Text } from 'react-native-paper';
 import { router } from 'expo-router';
-import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../../constants/theme';
 import { StatusBar } from 'expo-status-bar';
 
-const { width } = Dimensions.get('window');
-
 export default function WelcomeScreen() {
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const slideAnim = useRef(new Animated.Value(30)).current;
+    const logoScale = useRef(new Animated.Value(0.9)).current;
+    const buttonFade = useRef(new Animated.Value(0)).current;
+    const buttonSlide = useRef(new Animated.Value(20)).current;
+
+    useEffect(() => {
+        // Staggered entrance animation
+        Animated.sequence([
+            Animated.parallel([
+                Animated.spring(logoScale, {
+                    toValue: 1,
+                    friction: 8,
+                    tension: 60,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(fadeAnim, {
+                    toValue: 1,
+                    duration: 600,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(slideAnim, {
+                    toValue: 0,
+                    duration: 600,
+                    useNativeDriver: true,
+                }),
+            ]),
+            Animated.parallel([
+                Animated.timing(buttonFade, {
+                    toValue: 1,
+                    duration: 400,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(buttonSlide, {
+                    toValue: 0,
+                    duration: 400,
+                    useNativeDriver: true,
+                }),
+            ]),
+        ]).start();
+    }, []);
+
     return (
         <View style={styles.container}>
-            <StatusBar style="light" />
+            <StatusBar style="dark" />
+
+            {/* Top section - Logo & tagline */}
             <View style={styles.topSection}>
-                <View style={styles.logoContainer}>
-                    <Text style={styles.logo}>FreelancerOS</Text>
-                    <View style={styles.dot} />
-                </View>
-                <Text style={styles.tagline}>Elevate your workflow with the most premium freelancer platform.</Text>
+                <Animated.View
+                    style={[
+                        styles.logoWrapper,
+                        {
+                            opacity: fadeAnim,
+                            transform: [{ scale: logoScale }, { translateY: slideAnim }],
+                        },
+                    ]}
+                >
+                    {/* Logo icon */}
+                    <View style={styles.logoIcon}>
+                        <Text style={styles.logoIconText}>TX</Text>
+                    </View>
+                    <Text style={styles.logoText}>TalentlyX</Text>
+                </Animated.View>
+
+                <Animated.View
+                    style={{
+                        opacity: fadeAnim,
+                        transform: [{ translateY: slideAnim }],
+                    }}
+                >
+                    <Text style={styles.title}>Join TalentlyX</Text>
+                    <Text style={styles.subtitle}>Find work or hire talent.</Text>
+                </Animated.View>
             </View>
 
-            <View style={styles.bottomSection}>
-                <Button
-                    mode="contained"
-                    onPress={() => router.push('/(auth)/register')}
+            {/* Bottom section - Buttons */}
+            <Animated.View
+                style={[
+                    styles.bottomSection,
+                    {
+                        opacity: buttonFade,
+                        transform: [{ translateY: buttonSlide }],
+                    },
+                ]}
+            >
+                <TouchableOpacity
                     style={styles.primaryButton}
-                    labelStyle={styles.primaryButtonLabel}
-                    contentStyle={styles.buttonContent}
+                    onPress={() => router.push('/(auth)/role-select')}
+                    activeOpacity={0.85}
                 >
-                    Get Started
-                </Button>
+                    <Text style={styles.primaryButtonText}>Sign Up</Text>
+                </TouchableOpacity>
 
-                <Button
-                    mode="outlined"
-                    onPress={() => router.push('/(auth)/login')}
+                <TouchableOpacity
                     style={styles.secondaryButton}
-                    labelStyle={styles.secondaryButtonLabel}
-                    contentStyle={styles.buttonContent}
+                    onPress={() => router.push('/(auth)/login')}
+                    activeOpacity={0.85}
                 >
-                    I already have an account
-                </Button>
-            </View>
+                    <Text style={styles.secondaryButtonText}>Login</Text>
+                </TouchableOpacity>
 
-            <View style={styles.footer}>
-                <Text style={styles.footerText}>By continuing, you agree to our Terms of Service.</Text>
-            </View>
+                <View style={styles.footer}>
+                    <Text style={styles.footerText}>
+                        By continuing, you agree to our Terms of Service.
+                    </Text>
+                </View>
+            </Animated.View>
         </View>
     );
 }
@@ -51,72 +119,100 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#000000',
-        paddingHorizontal: SPACING.xl,
+        backgroundColor: '#FFFFFF',
+        paddingHorizontal: 24,
         justifyContent: 'space-between',
-        paddingVertical: SPACING.xxl,
+        paddingTop: Platform.OS === 'ios' ? 80 : 60,
+        paddingBottom: Platform.OS === 'ios' ? 40 : 32,
     },
     topSection: {
-        marginTop: 100,
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    logoContainer: {
-        flexDirection: 'row',
-        alignItems: 'baseline',
+    logoWrapper: {
+        alignItems: 'center',
+        marginBottom: 40,
     },
-    logo: {
-        fontSize: 42,
-        fontWeight: '900',
-        color: '#FFFFFF',
-        letterSpacing: -2,
+    logoIcon: {
+        width: 64,
+        height: 64,
+        borderRadius: 18,
+        backgroundColor: '#000000',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 16,
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.1,
+        shadowRadius: 16,
+        elevation: 6,
     },
-    dot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: '#FFFFFF',
-        marginLeft: 4,
+    logoIconText: {
+        fontSize: 22,
+        fontWeight: '800',
+        color: '#C1F21D',
+        letterSpacing: -1,
     },
-    tagline: {
+    logoText: {
+        fontSize: 28,
+        fontWeight: '800',
+        color: '#000000',
+        letterSpacing: -0.5,
+    },
+    title: {
         fontSize: 24,
-        fontWeight: '500',
-        color: '#94A3B8',
-        marginTop: SPACING.md,
-        lineHeight: 32,
+        fontWeight: '700',
+        color: '#111111',
+        textAlign: 'center',
+        marginBottom: 8,
+    },
+    subtitle: {
+        fontSize: 16,
+        fontWeight: '400',
+        color: '#6B7280',
+        textAlign: 'center',
     },
     bottomSection: {
-        gap: SPACING.md,
+        gap: 12,
     },
     primaryButton: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: BORDER_RADIUS.md,
-        height: 56,
+        backgroundColor: '#C1F21D',
+        borderRadius: 14,
+        height: 52,
+        alignItems: 'center',
         justifyContent: 'center',
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.06,
+        shadowRadius: 20,
+        elevation: 3,
     },
-    primaryButtonLabel: {
-        color: '#000000',
-        fontSize: 18,
-        fontWeight: '700',
-    },
-    secondaryButton: {
-        borderColor: '#334155',
-        borderRadius: BORDER_RADIUS.md,
-        height: 56,
-        justifyContent: 'center',
-        borderWidth: 1.5,
-    },
-    secondaryButtonLabel: {
-        color: '#FFFFFF',
+    primaryButtonText: {
         fontSize: 16,
         fontWeight: '600',
+        color: '#000000',
     },
-    buttonContent: {
-        height: 56,
+    secondaryButton: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 14,
+        height: 52,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#000000',
+    },
+    secondaryButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#000000',
     },
     footer: {
         alignItems: 'center',
+        marginTop: 16,
     },
     footerText: {
-        color: '#64748B',
+        color: '#9CA3AF',
         fontSize: 12,
         textAlign: 'center',
     },

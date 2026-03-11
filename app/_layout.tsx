@@ -17,19 +17,19 @@ export default function RootLayout() {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#000000' }}>
-        <ActivityIndicator size="large" color="#FFFFFF" />
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF' }}>
+        <ActivityIndicator size="large" color="#C1F21D" />
       </View>
     );
   }
 
   return (
     <PaperProvider theme={paperTheme}>
-      <View style={{ flex: 1, backgroundColor: '#000000' }}>
-        <StatusBar style="light" />
+      <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+        <StatusBar style="dark" />
         <Stack screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: '#000000' }
+          contentStyle: { backgroundColor: '#FFFFFF' }
         }}>
           {isAuthenticated ? (
             <>

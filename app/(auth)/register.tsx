@@ -1,34 +1,72 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { Text, TextInput, Button, SegmentedButtons } from 'react-native-paper';
-import { Link, router } from 'expo-router';
-import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES } from '../../constants/theme';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  View,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TouchableOpacity,
+  Animated,
+} from 'react-native';
+import { Text, TextInput } from 'react-native-paper';
+import { router, useLocalSearchParams } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { signUp } from '../../services/auth';
 import { UserRole } from '../../types';
 
 export default function RegisterScreen() {
-  const [name, setName] = useState('');
+  const params = useLocalSearchParams<{ role?: string; method?: string }>();
+  const selectedRole = (params.role as UserRole) || 'freelancer';
+  const method = params.method || 'email';
+
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [country, setCountry] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<UserRole>('freelancer');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [secureEntry, setSecureEntry] = useState(true);
 
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
   const handleRegister = async () => {
-    if (!name.trim() || !email.trim() || !password.trim()) {
-      setError('Please fill in all fields');
+    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+    if (!fullName || !email.trim()) {
+      setError('Please fill in all required fields');
       return;
     }
-    if (password.length < 6) {
+    if (method === 'email' && (!password.trim() || password.length < 6)) {
       setError('Password must be at least 6 characters');
       return;
     }
     setError('');
     setLoading(true);
     try {
-      await signUp(email.trim(), password, name.trim(), role);
-      router.replace('/(auth)/onboarding');
+      await signUp(
+        email.trim(),
+        method === 'email' ? password : 'google-auth-placeholder',
+        fullName,
+        selectedRole
+      );
+      router.replace('/(auth)/setup-profile');
     } catch (err: any) {
       setError(err.message || 'Registration failed');
     } finally {
@@ -36,96 +74,181 @@ export default function RegisterScreen() {
     }
   };
 
+  const handleBack = () => {
+    router.back();
+  };
+
+  const isGoogle = method === 'google';
+  const headerTitle = isGoogle ? 'Complete your profile' : 'Create your account';
+  const headerSubtitle = isGoogle
+    ? 'Fill in your details to get started'
+    : 'Enter your information below';
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <View style={styles.header}>
-          <Text style={styles.logo}>FreelancerOS</Text>
-          <Text style={styles.tagline}>Create your account</Text>
-        </View>
+      <StatusBar style="dark" />
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Back */}
+        <TouchableOpacity style={styles.backButton} onPress={handleBack} activeOpacity={0.7}>
+          <Text style={styles.backIcon}>←</Text>
+        </TouchableOpacity>
 
-        <View style={styles.form}>
-          <TextInput
-            label="Full Name"
-            value={name}
-            onChangeText={setName}
-            mode="outlined"
-            style={styles.input}
-            outlineStyle={styles.inputOutline}
-          />
+        {/* Header */}
+        <Animated.View
+          style={[
+            styles.header,
+            { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
+          ]}
+        >
+          <Text style={styles.title}>{headerTitle}</Text>
+          <Text style={styles.subtitle}>{headerSubtitle}</Text>
+        </Animated.View>
 
-          <TextInput
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            mode="outlined"
-            style={styles.input}
-            outlineStyle={styles.inputOutline}
-          />
-
-          <TextInput
-            label="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={secureEntry}
-            mode="outlined"
-            style={styles.input}
-            outlineStyle={styles.inputOutline}
-            right={
-              <TextInput.Icon
-                icon={secureEntry ? 'eye-off' : 'eye'}
-                onPress={() => setSecureEntry(!secureEntry)}
+        {/* Form */}
+        <Animated.View
+          style={[
+            styles.form,
+            { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
+          ]}
+        >
+          <View style={styles.row}>
+            <View style={styles.halfField}>
+              <Text style={styles.fieldLabel}>First Name</Text>
+              <TextInput
+                value={firstName}
+                onChangeText={setFirstName}
+                mode="outlined"
+                placeholder="John"
+                style={styles.input}
+                outlineStyle={styles.inputOutline}
+                outlineColor="#E5E5E5"
+                activeOutlineColor="#C1F21D"
+                placeholderTextColor="#9CA3AF"
               />
-            }
-          />
+            </View>
+            <View style={styles.halfField}>
+              <Text style={styles.fieldLabel}>Last Name</Text>
+              <TextInput
+                value={lastName}
+                onChangeText={setLastName}
+                mode="outlined"
+                placeholder="Doe"
+                style={styles.input}
+                outlineStyle={styles.inputOutline}
+                outlineColor="#E5E5E5"
+                activeOutlineColor="#C1F21D"
+                placeholderTextColor="#9CA3AF"
+              />
+            </View>
+          </View>
 
-          <View style={styles.roleSection}>
-            <Text style={styles.roleLabel}>I want to...</Text>
-            <SegmentedButtons
-              value={role}
-              onValueChange={(v) => setRole(v as UserRole)}
-              buttons={[
-                {
-                  value: 'freelancer',
-                  label: 'Find Work',
-                  icon: 'briefcase-search',
-                },
-                {
-                  value: 'client',
-                  label: 'Hire Talent',
-                  icon: 'account-search',
-                },
-              ]}
-              style={styles.segmented}
+          <View style={styles.field}>
+            <Text style={styles.fieldLabel}>Email Address</Text>
+            <TextInput
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              mode="outlined"
+              placeholder="you@example.com"
+              style={styles.input}
+              outlineStyle={styles.inputOutline}
+              outlineColor="#E5E5E5"
+              activeOutlineColor="#C1F21D"
+              placeholderTextColor="#9CA3AF"
             />
           </View>
 
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+          <View style={styles.field}>
+            <Text style={styles.fieldLabel}>Phone Number</Text>
+            <TextInput
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+              mode="outlined"
+              placeholder="+1 (555) 000-0000"
+              style={styles.input}
+              outlineStyle={styles.inputOutline}
+              outlineColor="#E5E5E5"
+              activeOutlineColor="#C1F21D"
+              placeholderTextColor="#9CA3AF"
+            />
+          </View>
 
-          <Button
-            mode="contained"
+          <View style={styles.field}>
+            <Text style={styles.fieldLabel}>Country</Text>
+            <TextInput
+              value={country}
+              onChangeText={setCountry}
+              mode="outlined"
+              placeholder="United States"
+              style={styles.input}
+              outlineStyle={styles.inputOutline}
+              outlineColor="#E5E5E5"
+              activeOutlineColor="#C1F21D"
+              placeholderTextColor="#9CA3AF"
+            />
+          </View>
+
+          {/* Password field only for email signup */}
+          {!isGoogle && (
+            <View style={styles.field}>
+              <Text style={styles.fieldLabel}>Password</Text>
+              <TextInput
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={secureEntry}
+                mode="outlined"
+                placeholder="Min. 6 characters"
+                style={styles.input}
+                outlineStyle={styles.inputOutline}
+                outlineColor="#E5E5E5"
+                activeOutlineColor="#C1F21D"
+                placeholderTextColor="#9CA3AF"
+                right={
+                  <TextInput.Icon
+                    icon={secureEntry ? 'eye-off-outline' : 'eye-outline'}
+                    onPress={() => setSecureEntry(!secureEntry)}
+                    color="#9CA3AF"
+                  />
+                }
+              />
+            </View>
+          )}
+
+          {error ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : null}
+
+          {/* Submit button */}
+          <TouchableOpacity
+            style={[styles.submitButton, loading && styles.submitButtonDisabled]}
             onPress={handleRegister}
-            loading={loading}
+            activeOpacity={0.85}
             disabled={loading}
-            style={styles.button}
-            labelStyle={styles.buttonLabel}
-            contentStyle={styles.buttonContent}
           >
-            Create Account
-          </Button>
+            <Text style={styles.submitButtonText}>
+              {loading ? 'Creating account...' : isGoogle ? 'Save' : 'Submit'}
+            </Text>
+          </TouchableOpacity>
 
+          {/* Footer */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>Already have an account? </Text>
-            <Link href="/(auth)/login" style={styles.link}>
-              Sign In
-            </Link>
+            <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
+              <Text style={styles.loginLink}>Sign In</Text>
+            </TouchableOpacity>
           </View>
-        </View>
+        </Animated.View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -134,85 +257,114 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: '#FFFFFF',
   },
   content: {
     flexGrow: 1,
-    paddingHorizontal: SPACING.xl,
-    paddingTop: 80,
+    paddingHorizontal: 24,
+    paddingTop: Platform.OS === 'ios' ? 60 : 48,
     paddingBottom: 40,
   },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: '#F5F5F5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  backIcon: {
+    fontSize: 20,
+    color: '#111111',
+  },
   header: {
-    marginBottom: 40,
+    marginBottom: 32,
   },
-  logo: {
-    fontSize: 32,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: -1.5,
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#000000',
+    letterSpacing: -0.5,
+    marginBottom: 8,
   },
-  tagline: {
+  subtitle: {
     fontSize: 16,
-    color: '#94A3B8',
-    marginTop: 8,
-    fontWeight: '500',
+    color: '#6B7280',
+    fontWeight: '400',
   },
   form: {
-    gap: 16,
+    gap: 20,
+  },
+  row: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  halfField: {
+    flex: 1,
+  },
+  field: {},
+  fieldLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#111111',
+    marginBottom: 6,
   },
   input: {
-    backgroundColor: '#000000',
+    backgroundColor: '#FFFFFF',
+    fontSize: 16,
+    height: 48,
   },
   inputOutline: {
     borderRadius: 12,
-    borderColor: '#334155',
     borderWidth: 1.5,
+    borderColor: '#E5E5E5',
   },
-  roleSection: {
-    gap: 12,
-    marginVertical: 10,
+  errorContainer: {
+    backgroundColor: '#FEF2F2',
+    borderRadius: 12,
+    padding: 12,
   },
-  roleLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#94A3B8',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  segmented: {
-    backgroundColor: '#000000',
-  },
-  error: {
-    color: COLORS.danger,
+  errorText: {
+    color: '#EF4444',
     fontSize: 14,
     textAlign: 'center',
+    fontWeight: '500',
   },
-  button: {
-    marginTop: 10,
-    borderRadius: 12,
-    height: 56,
+  submitButton: {
+    backgroundColor: '#C1F21D',
+    borderRadius: 14,
+    height: 52,
+    alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
+    marginTop: 8,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.06,
+    shadowRadius: 20,
+    elevation: 3,
   },
-  buttonLabel: {
+  submitButtonDisabled: {
+    backgroundColor: '#E5E5E5',
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  submitButtonText: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#000000',
-  },
-  buttonContent: {
-    height: 56,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 24,
+    marginTop: 8,
   },
   footerText: {
-    color: '#64748B',
+    color: '#6B7280',
     fontSize: 14,
   },
-  link: {
-    color: '#FFFFFF',
+  loginLink: {
+    color: '#000000',
     fontSize: 14,
     fontWeight: '700',
   },
