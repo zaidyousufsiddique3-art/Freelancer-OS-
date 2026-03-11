@@ -36,7 +36,8 @@ export default function MessagesScreen() {
       <Avatar.Text
         size={48}
         label={getOtherName(item).charAt(0).toUpperCase()}
-        style={{ backgroundColor: COLORS.primary }}
+        style={{ backgroundColor: '#C1F21D' }}
+        labelStyle={{ color: '#000000', fontWeight: '700' }}
       />
       <View style={styles.chatInfo}>
         <View style={styles.chatHeader}>
@@ -79,7 +80,7 @@ export default function MessagesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: '#FFFFFF',
   },
   listContent: {
     paddingBottom: 100,
@@ -89,7 +90,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#000000',
+    backgroundColor: '#FFFFFF',
     gap: 16,
   },
   chatInfo: {
@@ -103,27 +104,27 @@ const styles = StyleSheet.create({
   chatName: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#111111',
   },
   chatTime: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#9CA3AF',
   },
   chatTask: {
     fontSize: 12,
-    color: '#FFFFFF',
+    color: '#111111',
     fontWeight: '700',
     marginTop: 2,
     opacity: 0.7,
   },
   chatLastMessage: {
     fontSize: 14,
-    color: '#94A3B8',
+    color: '#6B7280',
     marginTop: 4,
   },
   separator: {
     height: 1,
-    backgroundColor: '#1E293B',
+    backgroundColor: '#F0F0F0',
     marginHorizontal: 20,
   },
   empty: {
@@ -135,13 +136,13 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 22,
     fontWeight: '900',
-    color: '#FFFFFF',
+    color: '#111111',
     marginBottom: 8,
     letterSpacing: -0.5,
   },
   emptySubtitle: {
     fontSize: 16,
-    color: '#64748B',
+    color: '#6B7280',
     textAlign: 'center',
     lineHeight: 24,
   },

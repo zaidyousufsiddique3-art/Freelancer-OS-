@@ -23,7 +23,7 @@ export default function TaskCard({ task, onPress, showActions, onAccept, onCount
       <View style={styles.card}>
         <View style={styles.header}>
           <Chip
-            style={[styles.categoryChip, { backgroundColor: category.color + '20' }]}
+            style={[styles.categoryChip, { backgroundColor: category.color + '15' }]}
             textStyle={[styles.categoryText, { color: category.color }]}
             icon={() => (
               <MaterialCommunityIcons name={category.icon as any} size={14} color={category.color} />
@@ -45,11 +45,11 @@ export default function TaskCard({ task, onPress, showActions, onAccept, onCount
             <Text style={styles.budget}>{formatBudget(task.budget)}</Text>
           </View>
           <View style={styles.metaItem}>
-            <MaterialCommunityIcons name="clock-outline" size={18} color={COLORS.textSecondary} />
+            <MaterialCommunityIcons name="clock-outline" size={18} color="#9CA3AF" />
             <Text style={styles.deadline}>{formatDeadline(task.deadline)}</Text>
           </View>
           <View style={styles.metaItem}>
-            <MaterialCommunityIcons name="account-multiple" size={18} color={COLORS.textSecondary} />
+            <MaterialCommunityIcons name="account-multiple" size={18} color="#9CA3AF" />
             <Text style={styles.offers}>{task.offerCount} offers</Text>
           </View>
         </View>
@@ -71,13 +71,18 @@ export default function TaskCard({ task, onPress, showActions, onAccept, onCount
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#111111',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: SPACING.lg,
     marginHorizontal: SPACING.md,
     marginVertical: SPACING.sm,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#F0F0F0',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
   },
   header: {
     flexDirection: 'row',
@@ -96,18 +101,18 @@ const styles = StyleSheet.create({
   },
   timeAgo: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#9CA3AF',
   },
   title: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#111111',
     marginBottom: 6,
     letterSpacing: -0.3,
   },
   description: {
     fontSize: 14,
-    color: '#94A3B8',
+    color: '#6B7280',
     lineHeight: 20,
     marginBottom: SPACING.md,
   },
@@ -123,15 +128,15 @@ const styles = StyleSheet.create({
   budget: {
     fontSize: 14,
     fontWeight: '800',
-    color: '#10B981',
+    color: '#22C55E',
   },
   deadline: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#9CA3AF',
   },
   offers: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#9CA3AF',
   },
   actions: {
     flexDirection: 'row',
@@ -139,11 +144,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#1E293B',
+    borderTopColor: '#F0F0F0',
   },
   acceptButton: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#C1F21D',
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',
@@ -155,15 +160,15 @@ const styles = StyleSheet.create({
   },
   counterButton: {
     flex: 1,
-    backgroundColor: '#1E293B',
+    backgroundColor: '#F5F5F5',
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#E5E5E5',
   },
   counterText: {
-    color: '#FFFFFF',
+    color: '#111111',
     fontWeight: '700',
     fontSize: 14,
   },

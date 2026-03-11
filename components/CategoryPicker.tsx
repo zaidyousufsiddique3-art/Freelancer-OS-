@@ -37,7 +37,7 @@ export default function CategoryPicker({ selected, onSelect, multiple }: Categor
             <MaterialCommunityIcons
               name={cat.icon as any}
               size={28}
-              color={active ? cat.color : COLORS.textLight}
+              color={active ? cat.color : '#9CA3AF'}
             />
             <Text
               style={[
@@ -70,13 +70,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: '#1E293B',
-    backgroundColor: '#111111',
+    borderColor: '#E5E5E5',
+    backgroundColor: '#FFFFFF',
     minHeight: 100,
   },
   label: {
     fontSize: 12,
-    color: '#94A3B8',
+    color: '#6B7280',
     textAlign: 'center',
     marginTop: 10,
     fontWeight: '500',

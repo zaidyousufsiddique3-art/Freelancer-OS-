@@ -52,11 +52,11 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.lg,
   },
   ownBubble: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#C1F21D',
     borderBottomRightRadius: 4,
   },
   otherBubble: {
-    backgroundColor: COLORS.divider,
+    backgroundColor: '#F5F5F5',
     borderBottomLeftRadius: 4,
   },
   text: {
@@ -64,10 +64,10 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   ownText: {
-    color: '#FFFFFF',
+    color: '#000000',
   },
   otherText: {
-    color: COLORS.text,
+    color: '#111111',
   },
   footer: {
     flexDirection: 'row',
@@ -80,13 +80,13 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   ownTime: {
-    color: 'rgba(255,255,255,0.7)',
+    color: 'rgba(0,0,0,0.5)',
   },
   otherTime: {
-    color: COLORS.textLight,
+    color: '#9CA3AF',
   },
   readReceipt: {
     fontSize: 10,
-    color: 'rgba(255,255,255,0.7)',
+    color: 'rgba(0,0,0,0.5)',
   },
 });

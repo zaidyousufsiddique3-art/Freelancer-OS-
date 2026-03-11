@@ -5,11 +5,11 @@ import { TaskStatus } from '../types';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES } from '../constants/theme';
 
 const STATUS_CONFIG: Record<TaskStatus, { label: string; color: string; bg: string }> = {
-  open: { label: 'Open', color: COLORS.info, bg: COLORS.primaryLight },
-  assigned: { label: 'Assigned', color: COLORS.warning, bg: COLORS.accentLight },
-  in_progress: { label: 'In Progress', color: COLORS.primary, bg: COLORS.primaryLight },
-  completed: { label: 'Completed', color: COLORS.success, bg: COLORS.secondaryLight },
-  cancelled: { label: 'Cancelled', color: COLORS.danger, bg: COLORS.dangerLight },
+  open: { label: 'Open', color: COLORS.info, bg: '#EFF6FF' },
+  assigned: { label: 'Assigned', color: COLORS.warning, bg: '#FFFBEB' },
+  in_progress: { label: 'In Progress', color: '#C1F21D', bg: '#F7FEE7' },
+  completed: { label: 'Completed', color: COLORS.success, bg: '#F0FDF4' },
+  cancelled: { label: 'Cancelled', color: COLORS.danger, bg: '#FEF2F2' },
 };
 
 interface StatusBadgeProps {
@@ -36,7 +36,6 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     gap: 6,
     alignSelf: 'flex-start',
-    backgroundColor: '#1E293B',
   },
   dot: {
     width: 6,

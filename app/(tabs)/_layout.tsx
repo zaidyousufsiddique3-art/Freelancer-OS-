@@ -11,11 +11,11 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: COLORS.textSecondary,
+        tabBarActiveTintColor: '#000000',
+        tabBarInactiveTintColor: '#9CA3AF',
         tabBarStyle: {
-          backgroundColor: '#000000',
-          borderTopColor: '#1E293B',
+          backgroundColor: '#FFFFFF',
+          borderTopColor: '#F0F0F0',
           height: Platform.OS === 'ios' ? 88 : 68,
           paddingBottom: Platform.OS === 'ios' ? 30 : 12,
           paddingTop: 12,
@@ -28,20 +28,20 @@ export default function TabLayout() {
           marginTop: 4,
         },
         headerStyle: {
-          backgroundColor: '#000000',
+          backgroundColor: '#FFFFFF',
           elevation: 0,
           shadowOpacity: 0,
           borderBottomWidth: 1,
-          borderBottomColor: '#1E293B',
+          borderBottomColor: '#F0F0F0',
         },
         headerTitleStyle: {
-          color: COLORS.text,
+          color: '#111111',
           fontWeight: '800',
           fontSize: 22,
           letterSpacing: -0.5,
         },
       }}
-      sceneContainerStyle={{ backgroundColor: '#000000' }}
+      sceneContainerStyle={{ backgroundColor: '#FFFFFF' }}
     >
       <Tabs.Screen
         name="index"

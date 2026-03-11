@@ -59,6 +59,8 @@ export default function HomeScreen() {
           onChangeText={setSearchQuery}
           style={styles.searchbar}
           inputStyle={styles.searchInput}
+          iconColor="#9CA3AF"
+          placeholderTextColor="#9CA3AF"
         />
       </View>
 
@@ -124,7 +126,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: '#FFFFFF',
   },
   searchContainer: {
     paddingHorizontal: SPACING.md,
@@ -132,16 +134,16 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xs,
   },
   searchbar: {
-    backgroundColor: '#111111',
+    backgroundColor: '#F5F5F5',
     borderRadius: 14,
     elevation: 0,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#F0F0F0',
     height: 52,
   },
   searchInput: {
     fontSize: 15,
-    color: '#FFFFFF',
+    color: '#111111',
   },
   filterContainer: {
     paddingVertical: 12,
@@ -151,16 +153,16 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   filterChip: {
-    backgroundColor: '#111111',
-    borderColor: '#1E293B',
+    backgroundColor: '#F5F5F5',
+    borderColor: '#E5E5E5',
     height: 36,
   },
   filterChipActive: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#FFFFFF',
+    backgroundColor: '#C1F21D',
+    borderColor: '#C1F21D',
   },
   filterChipText: {
-    color: '#94A3B8',
+    color: '#6B7280',
     fontSize: 13,
     fontWeight: '600',
   },
@@ -180,13 +182,13 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 22,
     fontWeight: '900',
-    color: '#FFFFFF',
+    color: '#111111',
     marginBottom: 8,
     letterSpacing: -0.5,
   },
   emptySubtitle: {
     fontSize: 16,
-    color: '#64748B',
+    color: '#6B7280',
     textAlign: 'center',
     lineHeight: 24,
   },

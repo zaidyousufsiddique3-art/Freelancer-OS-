@@ -28,7 +28,8 @@ export default function OfferCard({ offer, onAccept, onReject, isClientView }: O
           <Avatar.Text
             size={44}
             label={offer.freelancerName.charAt(0).toUpperCase()}
-            style={{ backgroundColor: COLORS.primary }}
+            style={{ backgroundColor: '#C1F21D' }}
+            labelStyle={{ color: '#000000', fontWeight: '700' }}
           />
           <View style={styles.nameContainer}>
             <Text style={styles.name}>{offer.freelancerName}</Text>
@@ -48,7 +49,7 @@ export default function OfferCard({ offer, onAccept, onReject, isClientView }: O
       ) : null}
 
       <View style={styles.statusRow}>
-        <View style={[styles.statusBadge, { backgroundColor: statusColors[offer.status] + '20' }]}>
+        <View style={[styles.statusBadge, { backgroundColor: statusColors[offer.status] + '15' }]}>
           <Text style={[styles.statusText, { color: statusColors[offer.status] }]}>
             {offer.status.charAt(0).toUpperCase() + offer.status.slice(1)}
           </Text>
@@ -58,7 +59,7 @@ export default function OfferCard({ offer, onAccept, onReject, isClientView }: O
       {isClientView && offer.status === 'pending' && (
         <View style={styles.actions}>
           <TouchableOpacity style={styles.acceptButton} onPress={onAccept}>
-            <MaterialCommunityIcons name="check" size={18} color="#FFFFFF" />
+            <MaterialCommunityIcons name="check" size={18} color="#000000" />
             <Text style={styles.acceptText}>Accept</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.rejectButton} onPress={onReject}>
@@ -73,16 +74,18 @@ export default function OfferCard({ offer, onAccept, onReject, isClientView }: O
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#FFFFFF',
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.lg,
     marginHorizontal: SPACING.md,
     marginVertical: SPACING.sm,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
   },
   header: {
     flexDirection: 'row',
@@ -101,11 +104,11 @@ const styles = StyleSheet.create({
   name: {
     fontSize: FONT_SIZES.md,
     fontWeight: '700',
-    color: COLORS.text,
+    color: '#111111',
   },
   time: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.textLight,
+    color: '#9CA3AF',
     marginTop: 2,
   },
   priceContainer: {
@@ -118,12 +121,12 @@ const styles = StyleSheet.create({
   },
   delivery: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.textSecondary,
+    color: '#6B7280',
     marginTop: 2,
   },
   message: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
+    color: '#6B7280',
     lineHeight: 20,
     marginTop: SPACING.sm,
   },
@@ -146,11 +149,11 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     paddingTop: SPACING.md,
     borderTopWidth: 1,
-    borderTopColor: COLORS.divider,
+    borderTopColor: '#F0F0F0',
   },
   acceptButton: {
     flex: 1,
-    backgroundColor: COLORS.success,
+    backgroundColor: '#C1F21D',
     paddingVertical: SPACING.sm + 2,
     borderRadius: BORDER_RADIUS.sm,
     alignItems: 'center',
@@ -159,13 +162,13 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   acceptText: {
-    color: '#FFFFFF',
+    color: '#000000',
     fontWeight: '700',
     fontSize: FONT_SIZES.sm,
   },
   rejectButton: {
     flex: 1,
-    backgroundColor: COLORS.dangerLight,
+    backgroundColor: '#FEF2F2',
     paddingVertical: SPACING.sm + 2,
     borderRadius: BORDER_RADIUS.sm,
     alignItems: 'center',

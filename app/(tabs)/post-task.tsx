@@ -108,6 +108,8 @@ export default function PostTaskScreen() {
             mode="outlined"
             style={styles.input}
             outlineStyle={styles.inputOutline}
+            outlineColor="#E5E5E5"
+            activeOutlineColor="#C1F21D"
             placeholder="e.g., Design a modern logo for my startup"
           />
 
@@ -120,6 +122,8 @@ export default function PostTaskScreen() {
             numberOfLines={5}
             style={[styles.input, styles.textArea]}
             outlineStyle={styles.inputOutline}
+            outlineColor="#E5E5E5"
+            activeOutlineColor="#C1F21D"
             placeholder="Describe what you need, any specific requirements, style preferences..."
           />
         </View>
@@ -139,6 +143,8 @@ export default function PostTaskScreen() {
             keyboardType="numeric"
             style={styles.input}
             outlineStyle={styles.inputOutline}
+            outlineColor="#E5E5E5"
+            activeOutlineColor="#C1F21D"
             left={<TextInput.Affix text="$" />}
             placeholder="e.g., 200"
           />
@@ -151,6 +157,8 @@ export default function PostTaskScreen() {
             keyboardType="numeric"
             style={styles.input}
             outlineStyle={styles.inputOutline}
+            outlineColor="#E5E5E5"
+            activeOutlineColor="#C1F21D"
             placeholder="e.g., 7"
             right={<TextInput.Affix text="days" />}
           />
@@ -195,7 +203,7 @@ export default function PostTaskScreen() {
           disabled={!canProceed() || loading}
           loading={loading}
           style={[styles.navButton, styles.navButtonPrimary]}
-          labelStyle={styles.navButtonLabel}
+          labelStyle={styles.navButtonPrimaryLabel}
           contentStyle={styles.navButtonContent}
         >
           {step < totalSteps ? 'Continue' : 'Post Task'}
@@ -208,7 +216,7 @@ export default function PostTaskScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: '#FFFFFF',
   },
   content: {
     padding: 24,
@@ -224,10 +232,10 @@ const styles = StyleSheet.create({
     width: 32,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#1E293B',
+    backgroundColor: '#E5E5E5',
   },
   progressDotActive: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#C1F21D',
   },
   progressDotCurrent: {
     width: 48,
@@ -238,38 +246,38 @@ const styles = StyleSheet.create({
   stepTitle: {
     fontSize: 28,
     fontWeight: '900',
-    color: '#FFFFFF',
+    color: '#111111',
     letterSpacing: -1,
   },
   stepSubtitle: {
     fontSize: 15,
-    color: '#64748B',
+    color: '#6B7280',
     lineHeight: 22,
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#000000',
+    backgroundColor: '#FFFFFF',
   },
   inputOutline: {
     borderRadius: 12,
-    borderColor: '#334155',
+    borderColor: '#E5E5E5',
   },
   textArea: {
     minHeight: 120,
   },
   summaryCard: {
-    backgroundColor: '#111111',
+    backgroundColor: '#F5F5F5',
     borderRadius: 16,
     padding: 20,
     gap: 12,
     marginTop: 8,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#F0F0F0',
   },
   summaryTitle: {
     fontSize: 14,
     fontWeight: '800',
-    color: '#94A3B8',
+    color: '#6B7280',
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: 4,
@@ -281,12 +289,12 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 14,
-    color: '#64748B',
+    color: '#6B7280',
   },
   summaryValue: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#111111',
   },
   nav: {
     flexDirection: 'row',
@@ -295,17 +303,22 @@ const styles = StyleSheet.create({
   },
   navButton: {
     flex: 1,
-    borderRadius: 12,
+    borderRadius: 14,
     height: 52,
     justifyContent: 'center',
   },
   navButtonPrimary: {
     flex: 2,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#C1F21D',
   },
   navButtonLabel: {
     fontSize: 16,
     fontWeight: '700',
+  },
+  navButtonPrimaryLabel: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#000000',
   },
   navButtonContent: {
     height: 52,
